@@ -1,449 +1,384 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Liz's Planner</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-:root{--bg:#fff;--bg2:#f9f8f6;--bg3:#f2f0ec;--border:#e5e3de;--text:#1c1b18;--text2:#6a6a62;--text3:#a9a9a0;--purple:#7c6fcd;--purpleL:#eeedfb;--purpleD:#3f3a99;--teal:#1a9e74;--tealL:#e0f5ee;--tealD:#085040;--amber:#d99520;--amberL:#fdf2d8;--red:#d63c3c;--redL:#fdeaea;--pink:#d63b8a;--pinkL:#fce8f3;--pinkD:#8a1a55;--radius:10px;--rsm:6px}
-body{background:#fff}
-.planner{display:flex;height:700px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.07)}
-.sidebar{width:182px;min-width:182px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.sb-top{padding:14px 14px 12px;border-bottom:1px solid var(--border)}
-.sb-name{font-size:13px;font-weight:700;color:var(--text)}
-.sb-sub{font-size:10.5px;color:var(--text3);margin-top:2px}
-.sb-sec{padding:9px 14px 3px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
-.ni{display:flex;align-items:center;gap:7px;padding:6px 14px;font-size:12px;color:var(--text2);cursor:pointer;transition:background .1s;border-right:2px solid transparent}
-.ni:hover{background:var(--bg3);color:var(--text)}
-.ni.active{background:#fff;color:var(--purple);font-weight:600;border-right-color:var(--purple)}
-.ni-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.main{flex:1;overflow-y:auto;background:#fff}
-.page{display:none;padding:18px;flex-direction:column;gap:13px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{--bg:#fff;--bg2:#f9f8f6;--bg3:#f2f0ec;--border:#e5e3de;--text:#1c1b18;--text2:#6a6a62;--text3:#a9a9a0;--purple:#7c6fcd;--purpleL:#eeedfb;--purpleD:#3f3a99;--teal:#1a9e74;--tealL:#e0f5ee;--tealD:#085040;--amber:#d99520;--amberL:#fdf2d8;--red:#d63c3c;--redL:#fdeaea;--pink:#d63b8a;--pinkL:#fce8f3;--pinkD:#8a1a55;--nav-h:60px;--header-h:52px}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+.top-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.top-header h1{font-size:16px;font-weight:700;color:var(--text)}
+.menu-btn{width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex-shrink:0}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:none;opacity:0;transition:opacity .25s}
+.drawer-overlay.open{display:block;opacity:1}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:260px;background:var(--bg2);z-index:201;transform:translateX(-100%);transition:transform .25s ease;overflow-y:auto;padding-bottom:20px}
+.drawer.open{transform:translateX(0)}
+.drawer-header{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.drawer-header h2{font-size:14px;font-weight:700;color:var(--text)}
+.close-drawer{font-size:22px;background:none;border:none;cursor:pointer;color:var(--text2);padding:4px}
+.dr-sec{padding:10px 16px 3px;font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.dr-item{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:14px;color:var(--text2);cursor:pointer;border-left:3px solid transparent;transition:background .1s}
+.dr-item:active{background:var(--bg3)}
+.dr-item.active{background:#fff;color:var(--purple);font-weight:600;border-left-color:var(--purple)}
+.dr-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.main{position:fixed;top:var(--header-h);left:0;right:0;bottom:var(--nav-h);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg)}
+.page{display:none;padding:14px;flex-direction:column;gap:12px;min-height:100%}
 .page.active{display:flex}
-.ptitle{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:2px}
-.row{display:flex;gap:12px}
-.col{flex:1;display:flex;flex-direction:column;gap:12px}
-.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px}
-.clabel{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
-button{cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:var(--rsm);padding:6px 11px;font-size:12px;transition:all .12s}
-button:hover{background:var(--bg2)}
-input,textarea,select{font-family:inherit;border:1px solid var(--border);border-radius:var(--rsm);padding:6px 9px;font-size:12.5px;color:var(--text);outline:none;background:#fff;width:100%}
+.ptitle{font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}
+.clabel{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.row{display:flex;gap:10px}
+.col{flex:1;display:flex;flex-direction:column;gap:10px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#fff;border-top:1px solid var(--border);display:flex;align-items:stretch;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:10px;color:var(--text3);padding:6px 2px;border:none;background:none;font-family:inherit}
+.bnav-item.active{color:var(--purple)}
+.bnav-item .icon{font-size:22px;line-height:1}
+.bnav-item span{font-size:9.5px;font-weight:500}
+button{cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:10px;padding:10px 14px;font-size:14px;transition:all .12s}
+button:active{opacity:.7}
+input,textarea,select{font-family:inherit;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:15px;color:var(--text);outline:none;background:#fff;width:100%}
 input:focus,textarea:focus,select:focus{border-color:var(--purple)}
-.bare-in{border:none;background:transparent;outline:none;font-family:inherit;font-size:12.5px;color:var(--text);padding:0;width:100%}
-.tag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px}
-.add-row-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:6px 0;font-family:inherit}
-.add-row-btn:hover{color:var(--purple)}
-.hour-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:33px}
+.bare-in{border:none;background:transparent;outline:none;font-family:inherit;font-size:14px;color:var(--text);padding:0;width:100%}
+.pill{border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;display:inline-flex;align-items:center}
+.hour-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:42px}
 .hour-row:last-child{border-bottom:none}
-.hlbl{font-size:9.5px;color:var(--text3);width:44px;padding:8px 4px 4px;flex-shrink:0}
-.hin{flex:1;border:none;background:transparent;font-size:12px;color:var(--text);padding:7px 4px;font-family:inherit;resize:none;outline:none;line-height:1.4}
-.hin:focus{background:#fafaf8}
-.ti{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.hlbl{font-size:10px;color:var(--text3);width:46px;padding:10px 4px 4px;flex-shrink:0}
+.hin{flex:1;border:none;background:transparent;font-size:14px;color:var(--text);padding:9px 4px;font-family:inherit;resize:none;outline:none;line-height:1.4}
+.ti{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .ti:last-child{border-bottom:none}
-.cb{width:14px;height:14px;accent-color:var(--purple);flex-shrink:0;cursor:pointer}
-.tin{flex:1;border:none;background:transparent;font-size:12.5px;color:var(--text);outline:none;font-family:inherit}
-.xbtn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0 2px;line-height:1;display:none}
-.ti:hover .xbtn{display:block}
-.pill{border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:600}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
-.chd{font-size:9px;color:var(--text3);text-align:center;padding:3px 0;font-weight:700}
-.cd{min-height:44px;border:1px solid var(--border);border-radius:4px;padding:3px 4px;font-size:10px;cursor:pointer;background:#fff}
-.cd:hover{background:var(--bg2)}
+.cb{width:20px;height:20px;accent-color:var(--purple);flex-shrink:0;cursor:pointer}
+.tin{flex:1;border:none;background:transparent;font-size:14px;color:var(--text);outline:none;font-family:inherit}
+.xbtn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:22px;padding:0 4px;line-height:1;min-width:32px}
+.add-row-btn{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text3);background:none;border:none;cursor:pointer;padding:10px 0;font-family:inherit}
+.med-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.med-row:last-child{border-bottom:none}
+.med-icon{width:36px;height:36px;border-radius:10px;background:var(--purpleL);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.med-cb{width:34px;height:34px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;background:#fff;flex-shrink:0}
+.med-cb.on{background:var(--purpleL);border-color:var(--purple);color:var(--purple)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.chd{font-size:10px;color:var(--text3);text-align:center;padding:4px 0;font-weight:700}
+.cd{min-height:40px;border:1px solid var(--border);border-radius:6px;padding:4px;cursor:pointer;background:#fff}
+.cd:active{background:var(--bg2)}
 .cd.today{border-color:var(--purple);background:var(--purpleL)}
 .cd.today .dn{color:var(--purpleD);font-weight:700}
 .cd.other .dn{color:var(--text3)}
-.dn{font-size:10.5px;color:var(--text2)}
+.dn{font-size:11px;color:var(--text2)}
 .ev-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
-.pbar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:5px}
+.pbar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:6px}
 .pfill{height:100%;border-radius:3px;transition:width .3s}
-.cake-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:12px;position:relative}
-.cake-card.urgent{border-left:3px solid var(--red)}
-.cake-card.upcoming{border-left:3px solid var(--amber)}
-.cake-card.ready{border-left:3px solid var(--teal)}
-.cake-status{position:absolute;top:10px;right:10px}
-.med-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
-.med-row:last-child{border-bottom:none}
-.med-icon{width:30px;height:30px;border-radius:8px;background:var(--purpleL);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.med-checks{display:flex;gap:4px}
-.med-cb{width:22px;height:22px;border:1.5px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;background:#fff;flex-shrink:0}
-.med-cb.on{background:var(--purpleL);border-color:var(--purple);color:var(--purple)}
-.act-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px}
-.act-row:last-child{border-bottom:none}
-.act-day{font-size:10px;font-weight:700;color:var(--text3);width:28px;flex-shrink:0}
-.htable{width:100%;border-collapse:collapse}
-.htable th{font-size:9.5px;color:var(--text3);font-weight:700;padding:4px;text-align:center;border-bottom:1px solid var(--border)}
-.htable td{padding:5px 4px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2)}
-.htable tr:last-child td{border-bottom:none}
-.hc{width:20px;height:20px;border:1.5px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:11px;transition:all .15s;background:#fff}
-.hc.on{background:var(--tealL);border-color:var(--teal);color:var(--teal)}
-.drop{width:33px;height:33px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px solid var(--border);font-size:16px;transition:all .15s}
+.cake-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;border-left:4px solid var(--amber)}
+.cake-card.urgent{border-left-color:var(--red)}
+.cake-card.ready{border-left-color:var(--teal)}
+.drop{width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px solid var(--border);font-size:19px;transition:all .15s}
 .drop.on{background:#daeef8;border-color:#5ea8cc}
+.act-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.act-row:last-child{border-bottom:none}
+.act-day-badge{font-size:10px;font-weight:700;color:var(--purple);background:var(--purpleL);padding:3px 7px;border-radius:20px;flex-shrink:0;margin-top:2px}
+.htable{width:100%;border-collapse:collapse}
+.htable th{font-size:10px;color:var(--text3);font-weight:700;padding:5px 3px;text-align:center;border-bottom:1px solid var(--border)}
+.htable td{padding:8px 3px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.htable tr:last-child td{border-bottom:none}
+.hc{width:28px;height:28px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:14px;transition:all .15s;background:#fff}
+.hc.on{background:var(--tealL);border-color:var(--teal);color:var(--teal)}
+.b-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.b-row:last-child{border-bottom:none}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-card{background:var(--bg2);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:3px}
+.stat-lbl{font-size:10.5px;color:var(--text3)}
 </style>
 </head>
 <body>
-<div class="planner">
 
-<nav class="sidebar">
-  <div class="sb-top">
-    <div class="sb-name">👩 Liz's Planner</div>
-    <div class="sb-sub" id="sb-date"></div>
-    <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
-      <span class="pill" style="background:var(--pinkL);color:var(--pinkD)">🎂 Cake Boss</span>
-      <span class="pill" style="background:var(--purpleL);color:var(--purpleD)">🧒 Daniel's Mom</span>
-    </div>
+<div class="top-header">
+  <div>
+    <div style="font-size:16px;font-weight:700;color:var(--text)">👩 Liz's Planner</div>
+    <div style="font-size:11px;color:var(--text3)" id="sb-date"></div>
   </div>
-  <div class="sb-sec">Today</div>
-  <div class="ni active" id="nav-daily" onclick="show('daily')"><span class="ni-dot" style="background:#7c6fcd"></span>Daily schedule</div>
-  <div class="ni" id="nav-tasks" onclick="show('tasks')"><span class="ni-dot" style="background:#a89fdd"></span>Tasks & priorities</div>
-  <div class="ni" id="nav-meds" onclick="show('meds')"><span class="ni-dot" style="background:#d63b8a"></span>💊 Medication</div>
-  <div class="ni" id="nav-wellness" onclick="show('wellness')"><span class="ni-dot" style="background:#1a9e74"></span>Wellness</div>
-  <div class="sb-sec">Daniel (10 yrs)</div>
-  <div class="ni" id="nav-liam" onclick="show('liam')"><span class="ni-dot" style="background:#d99520"></span>🧒 Activities</div>
-  <div class="sb-sec">Calendar</div>
-  <div class="ni" id="nav-calendar" onclick="show('calendar')"><span class="ni-dot" style="background:#7c6fcd"></span>Events & birthdays</div>
-  <div class="ni" id="nav-habits" onclick="show('habits')"><span class="ni-dot" style="background:#1a9e74"></span>Habit tracker</div>
-  <div class="sb-sec">🎂 Cake Business</div>
-  <div class="ni" id="nav-orders" onclick="show('orders')"><span class="ni-dot" style="background:#d63c3c"></span>Cake orders</div>
-  <div class="ni" id="nav-delivery" onclick="show('delivery')"><span class="ni-dot" style="background:#d99520"></span>Deliveries</div>
-  <div class="ni" id="nav-recipes" onclick="show('recipes')"><span class="ni-dot" style="background:#d63b8a"></span>Flavors & pricing</div>
-  <div class="sb-sec">Life</div>
-  <div class="ni" id="nav-budget" onclick="show('budget')"><span class="ni-dot" style="background:#7c6fcd"></span>Budget</div>
-  <div class="ni" id="nav-meals" onclick="show('meals')"><span class="ni-dot" style="background:#1a9e74"></span>Meal planner</div>
-  <div class="ni" id="nav-notes" onclick="show('notes')"><span class="ni-dot" style="background:#a9a9a0"></span>Notes</div>
-</nav>
-
-<main class="main">
-
-<!-- DAILY SCHEDULE -->
-<div class="page active" id="page-daily">
-  <div class="ptitle">🗓️ Daily schedule</div>
-  <div style="font-size:11.5px;color:var(--text3)" id="daily-date"></div>
-  <div class="row">
-    <div class="col">
-      <div class="card" style="padding:0 14px"><div id="hours-wrap"></div></div>
-    </div>
-    <div class="col" style="max-width:210px">
-      <div class="card">
-        <div class="clabel">💊 Daniel's meds today</div>
-        <div id="quick-meds"></div>
-      </div>
-      <div class="card">
-        <div class="clabel">🎂 Due today</div>
-        <div id="quick-cakes"></div>
-      </div>
-      <div class="card">
-        <div class="clabel">⚽ Daniel after school</div>
-        <div id="quick-activities"></div>
-      </div>
-    </div>
-  </div>
+  <button class="menu-btn" onclick="openDrawer()">☰</button>
 </div>
 
-<!-- TASKS -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h2>📓 Menu</h2>
+    <button class="close-drawer" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="dr-sec">Today</div>
+  <div class="dr-item active" id="nav-daily" onclick="show('daily')"><span class="dr-dot" style="background:#7c6fcd"></span>🗓️ Daily schedule</div>
+  <div class="dr-item" id="nav-tasks" onclick="show('tasks')"><span class="dr-dot" style="background:#a89fdd"></span>✅ Tasks & priorities</div>
+  <div class="dr-item" id="nav-meds" onclick="show('meds')"><span class="dr-dot" style="background:#d63b8a"></span>💊 Medication</div>
+  <div class="dr-item" id="nav-wellness" onclick="show('wellness')"><span class="dr-dot" style="background:#1a9e74"></span>🌿 Wellness</div>
+  <div class="dr-sec">Daniel (10 yrs)</div>
+  <div class="dr-item" id="nav-liam" onclick="show('liam')"><span class="dr-dot" style="background:#d99520"></span>🧒 Activities</div>
+  <div class="dr-sec">Calendar</div>
+  <div class="dr-item" id="nav-calendar" onclick="show('calendar')"><span class="dr-dot" style="background:#7c6fcd"></span>📅 Events & birthdays</div>
+  <div class="dr-item" id="nav-habits" onclick="show('habits')"><span class="dr-dot" style="background:#1a9e74"></span>🔄 Habits</div>
+  <div class="dr-sec">🎂 Cake Business</div>
+  <div class="dr-item" id="nav-orders" onclick="show('orders')"><span class="dr-dot" style="background:#d63c3c"></span>🎂 Cake orders</div>
+  <div class="dr-item" id="nav-delivery" onclick="show('delivery')"><span class="dr-dot" style="background:#d99520"></span>🚗 Deliveries</div>
+  <div class="dr-item" id="nav-recipes" onclick="show('recipes')"><span class="dr-dot" style="background:#d63b8a"></span>🍰 Flavors & pricing</div>
+  <div class="dr-sec">Life</div>
+  <div class="dr-item" id="nav-budget" onclick="show('budget')"><span class="dr-dot" style="background:#7c6fcd"></span>💰 Budget</div>
+  <div class="dr-item" id="nav-meals" onclick="show('meals')"><span class="dr-dot" style="background:#1a9e74"></span>🥗 Meal planner</div>
+  <div class="dr-item" id="nav-notes" onclick="show('notes')"><span class="dr-dot" style="background:#a9a9a0"></span>📝 Notes</div>
+</div>
+
+<div class="main">
+
+<div class="page active" id="page-daily">
+  <div class="ptitle">🗓️ Today</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-lbl">💊 Meds today</div><div id="med-stat" style="font-size:13px;margin-top:2px;color:var(--purple)"></div></div>
+    <div class="stat-card"><div class="stat-lbl">🎂 Cake orders</div><div id="cake-stat" style="font-size:13px;margin-top:2px;color:var(--pink)"></div></div>
+  </div>
+  <div class="card"><div class="clabel">⚽ Daniel after school</div><div id="quick-activities"></div></div>
+  <div class="card" style="padding:0 14px"><div id="hours-wrap"></div></div>
+</div>
+
 <div class="page" id="page-tasks">
   <div class="ptitle">✅ Tasks & priorities</div>
-  <div class="row">
-    <div class="col" style="max-width:230px">
-      <div class="card">
-        <div class="clabel">Top 3 priorities</div>
-        <div class="ti"><span class="pill" style="background:var(--purpleL);color:var(--purpleD);min-width:18px;text-align:center">1</span><input class="bare-in" placeholder="Most important today…"/></div>
-        <div class="ti"><span class="pill" style="background:var(--tealL);color:var(--tealD);min-width:18px;text-align:center">2</span><input class="bare-in" placeholder="Second priority…"/></div>
-        <div class="ti"><span class="pill" style="background:var(--amberL);color:#7a5010;min-width:18px;text-align:center">3</span><input class="bare-in" placeholder="Third priority…"/></div>
-      </div>
-      <div class="card">
-        <div class="clabel">Mood & energy</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap" id="mood-btns">
-          <button style="border-radius:20px;font-size:12px;padding:4px 10px" onclick="setMood(this)">😄 Great</button>
-          <button style="border-radius:20px;font-size:12px;padding:4px 10px" onclick="setMood(this)">😊 Good</button>
-          <button style="border-radius:20px;font-size:12px;padding:4px 10px" onclick="setMood(this)">😐 Okay</button>
-          <button style="border-radius:20px;font-size:12px;padding:4px 10px" onclick="setMood(this)">😩 Drained</button>
-        </div>
-      </div>
+  <div class="card">
+    <div class="clabel">Top 3 priorities</div>
+    <div class="ti"><span class="pill" style="background:var(--purpleL);color:var(--purpleD)">1</span><input class="bare-in" placeholder="Most important today…"/></div>
+    <div class="ti"><span class="pill" style="background:var(--tealL);color:var(--tealD)">2</span><input class="bare-in" placeholder="Second priority…"/></div>
+    <div class="ti"><span class="pill" style="background:var(--amberL);color:#7a5010">3</span><input class="bare-in" placeholder="Third priority…"/></div>
+  </div>
+  <div class="card">
+    <div class="clabel">Mood & energy</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="mood-btns">
+      <button style="border-radius:20px;padding:8px 14px" onclick="setMood(this)">😄 Great</button>
+      <button style="border-radius:20px;padding:8px 14px" onclick="setMood(this)">😊 Good</button>
+      <button style="border-radius:20px;padding:8px 14px" onclick="setMood(this)">😐 Okay</button>
+      <button style="border-radius:20px;padding:8px 14px" onclick="setMood(this)">😩 Drained</button>
     </div>
-    <div class="col">
-      <div class="card">
-        <div class="clabel">To-do list</div>
-        <div id="todo-list"></div>
-        <button class="add-row-btn" onclick="addTodo()">＋ Add task</button>
-      </div>
-    </div>
+  </div>
+  <div class="card">
+    <div class="clabel">To-do list</div>
+    <div id="todo-list"></div>
+    <button class="add-row-btn" onclick="addTodo()">＋ Add task</button>
   </div>
 </div>
 
-<!-- MEDICATION -->
 <div class="page" id="page-meds">
-  <div class="ptitle">💊 Medication tracker</div>
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="clabel" style="margin:0">Daniel's medications</div>
-          <button onclick="addMed('daniel')" style="font-size:11px;padding:4px 9px">＋ Add</button>
-        </div>
-        <div id="liam-meds"></div>
-      </div>
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="clabel" style="margin:0">Liz's medications</div>
-          <button onclick="addMed('mom')" style="font-size:11px;padding:4px 9px">＋ Add</button>
-        </div>
-        <div id="mom-meds"></div>
-      </div>
-    </div>
-    <div class="col" style="max-width:220px">
-      <div class="card">
-        <div class="clabel">Refill reminders</div>
-        <div id="refill-list" style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:12px;color:var(--text3)">No upcoming refills</div>
-        </div>
-        <button class="add-row-btn" onclick="addRefill()" style="margin-top:8px">＋ Add refill reminder</button>
-      </div>
-      <div class="card">
-        <div class="clabel">Notes / allergies</div>
-        <textarea style="min-height:100px;resize:none;border:none;background:transparent;outline:none;font-size:12.5px;color:var(--text);line-height:1.6" placeholder="Daniel: No penicillin&#10;Doctor: Dr. Chen (416-555-0190)&#10;Pharmacy: Shoppers Drug Mart"></textarea>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- WELLNESS -->
-<div class="page" id="page-wellness">
-  <div class="ptitle">🌿 Wellness</div>
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="clabel">💧 Water intake — <span id="wc">0</span> / 8 glasses</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap" id="drop-grid"></div>
-      </div>
-      <div class="card">
-        <div class="clabel">Sleep last night</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <input type="range" min="4" max="10" step=".5" value="7" id="sleep-range" oninput="document.getElementById('sleep-val').textContent=this.value+' hrs'" style="flex:1;border:none;padding:0">
-          <span id="sleep-val" style="font-size:14px;font-weight:600;color:var(--purple);min-width:48px">7 hrs</span>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="clabel">✨ Gratitude (3 things)</div>
-        <div class="ti"><span style="width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block"></span><input class="bare-in" placeholder="I'm grateful for…"/></div>
-        <div class="ti"><span style="width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block"></span><input class="bare-in" placeholder="Something that went well…"/></div>
-        <div class="ti"><span style="width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block"></span><input class="bare-in" placeholder="A person I appreciate…"/></div>
-      </div>
-      <div class="card">
-        <div class="clabel">Self-care wins today</div>
-        <div id="selfcare-list"></div>
-        <button class="add-row-btn" onclick="addSelfcare()">＋ Add win</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- DANIEL ACTIVITIES -->
-<div class="page" id="page-liam">
-  <div class="ptitle">🧒 Daniel's weekly activities</div>
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="clabel" style="margin:0">Weekly schedule</div>
-          <button onclick="addActivity()" style="font-size:11px;padding:4px 9px">＋ Add activity</button>
-        </div>
-        <div id="activity-list"></div>
-      </div>
-      <div class="card">
-        <div class="clabel">📋 School notes</div>
-        <textarea style="width:100%;min-height:90px;resize:none;font-size:12.5px;line-height:1.6;border:none;background:transparent;outline:none;color:var(--text)" placeholder="Homework due, tests, school events, teacher notes…"></textarea>
-      </div>
-    </div>
-    <div class="col" style="max-width:210px">
-      <div class="card">
-        <div class="clabel">🎒 This week's needs</div>
-        <div id="liam-checklist"></div>
-        <button class="add-row-btn" onclick="addLiamItem()">＋ Add item</button>
-      </div>
-      <div class="card">
-        <div class="clabel">🏆 Daniel's goals</div>
-        <div style="display:flex;flex-direction:column;gap:10px" id="liam-goals"></div>
-      </div>
-      <div class="card">
-        <div class="clabel">📞 Emergency contacts</div>
-        <div style="font-size:12px;display:flex;flex-direction:column;gap:6px">
-          <div><span style="color:var(--text3)">School:</span> <input class="bare-in" value="Maple Elem. 416-555-0101" style="font-size:12px"/></div>
-          <div><span style="color:var(--text3)">Coach:</span> <input class="bare-in" value="Coach Mike 416-555-0182" style="font-size:12px"/></div>
-          <div><span style="color:var(--text3)">Doctor:</span> <input class="bare-in" value="Dr. Chen 416-555-0190" style="font-size:12px"/></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CALENDAR -->
-<div class="page" id="page-calendar">
-  <div class="ptitle">📅 Events & birthdays</div>
-  <div class="row" style="align-items:flex-start">
-    <div class="col" style="max-width:300px">
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <button onclick="chMonth(-1)" style="padding:3px 9px">‹</button>
-          <span id="cal-lbl" style="font-size:13px;font-weight:700"></span>
-          <button onclick="chMonth(1)" style="padding:3px 9px">›</button>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap">
-          <span style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--text2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--purple);display:inline-block"></span>Personal</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--text2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--pink);display:inline-block"></span>Birthday 🎂</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--text2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Daniel</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--text2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>Cake delivery</span>
-        </div>
-        <div class="cal-grid" id="cal-grid"></div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <div class="clabel">Add event</div>
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <input type="date" id="ev-date" style="flex:1"/>
-          <select id="ev-type" style="flex:1">
-            <option value="personal">Personal</option>
-            <option value="birthday">🎂 Birthday</option>
-            <option value="liam">🧒 Daniel</option>
-            <option value="cake">🎂 Cake delivery</option>
-          </select>
-        </div>
-        <input id="ev-title" placeholder="Event / name…" style="margin-bottom:8px"/>
-        <button onclick="addEvent()" style="width:100%">Add to calendar</button>
-      </div>
-      <div class="card">
-        <div class="clabel">🎂 Upcoming birthdays</div>
-        <div id="bday-list" style="display:flex;flex-direction:column;gap:6px"></div>
-        <button class="add-row-btn" onclick="addBirthday()">＋ Add birthday</button>
-      </div>
-      <div class="card">
-        <div class="clabel">All events</div>
-        <div id="ev-list" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- HABITS -->
-<div class="page" id="page-habits">
-  <div class="ptitle">🔄 Habit tracker</div>
+  <div class="ptitle">💊 Medication</div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="clabel" style="margin:0">This week</div>
-      <button onclick="addHabit()" style="font-size:11px;padding:4px 9px">＋ Add habit</button>
+      <div class="clabel" style="margin:0">Daniel's medications</div>
+      <button onclick="addMed('daniel')" style="padding:8px 12px;font-size:13px">＋ Add</button>
     </div>
-    <table class="htable" id="htable"></table>
+    <div id="liam-meds"></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="clabel" style="margin:0">Liz's medications</div>
+      <button onclick="addMed('mom')" style="padding:8px 12px;font-size:13px">＋ Add</button>
+    </div>
+    <div id="mom-meds"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">Refill reminders</div>
+    <div id="refill-list"><div style="font-size:13px;color:var(--text3)">No upcoming refills</div></div>
+    <button class="add-row-btn" onclick="addRefill()">＋ Add refill reminder</button>
+  </div>
+  <div class="card">
+    <div class="clabel">Notes / allergies</div>
+    <textarea style="min-height:90px;resize:none;border:none;background:transparent;outline:none;font-size:14px;color:var(--text);line-height:1.6;width:100%" placeholder="Daniel: No penicillin&#10;Doctor: Dr. Chen (416-555-0190)&#10;Pharmacy: Shoppers Drug Mart"></textarea>
   </div>
 </div>
 
-<!-- CAKE ORDERS -->
+<div class="page" id="page-wellness">
+  <div class="ptitle">🌿 Wellness</div>
+  <div class="card">
+    <div class="clabel">💧 Water — <span id="wc">0</span> / 8 glasses</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px" id="drop-grid"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">Sleep last night</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <input type="range" min="4" max="10" step=".5" value="7" oninput="document.getElementById('sleep-val').textContent=this.value+' hrs'" style="flex:1;border:none;padding:0;height:32px">
+      <span id="sleep-val" style="font-size:18px;font-weight:700;color:var(--purple);min-width:56px">7 hrs</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="clabel">✨ Gratitude</div>
+    <div class="ti"><span style="width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block"></span><input class="bare-in" placeholder="I'm grateful for…"/></div>
+    <div class="ti"><span style="width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block"></span><input class="bare-in" placeholder="Something that went well…"/></div>
+    <div class="ti"><span style="width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block"></span><input class="bare-in" placeholder="A person I appreciate…"/></div>
+  </div>
+  <div class="card">
+    <div class="clabel">Self-care wins</div>
+    <div id="selfcare-list"></div>
+    <button class="add-row-btn" onclick="addSelfcare()">＋ Add win</button>
+  </div>
+</div>
+
+<div class="page" id="page-liam">
+  <div class="ptitle">🧒 Daniel's week</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="clabel" style="margin:0">Weekly activities</div>
+      <button onclick="addActivity()" style="padding:8px 12px;font-size:13px">＋ Add</button>
+    </div>
+    <div id="activity-list"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">🎒 This week's needs</div>
+    <div id="liam-checklist"></div>
+    <button class="add-row-btn" onclick="addLiamItem()">＋ Add item</button>
+  </div>
+  <div class="card">
+    <div class="clabel">🏆 Daniel's goals</div>
+    <div id="liam-goals"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">📋 School notes</div>
+    <textarea style="width:100%;min-height:100px;resize:none;font-size:14px;line-height:1.6;border:none;background:transparent;outline:none;color:var(--text)" placeholder="Homework, tests, events, teacher notes…"></textarea>
+  </div>
+  <div class="card">
+    <div class="clabel">📞 Emergency contacts</div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:14px">
+      <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--text3);width:60px;flex-shrink:0">School</span><input class="bare-in" value="Maple Elem. 416-555-0101"/></div>
+      <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--text3);width:60px;flex-shrink:0">Coach</span><input class="bare-in" value="Coach Mike 416-555-0182"/></div>
+      <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--text3);width:60px;flex-shrink:0">Doctor</span><input class="bare-in" value="Dr. Chen 416-555-0190"/></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-calendar">
+  <div class="ptitle">📅 Calendar</div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <button onclick="chMonth(-1)" style="padding:8px 14px;font-size:16px">‹</button>
+      <span id="cal-lbl" style="font-size:14px;font-weight:700"></span>
+      <button onclick="chMonth(1)" style="padding:8px 14px;font-size:16px">›</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="display:flex;align-items:center;gap:4px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:var(--purple);display:inline-block"></span>Personal</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:var(--pink);display:inline-block"></span>Birthday</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Daniel</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>Cake</span>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">Add event</div>
+    <input type="date" id="ev-date" style="margin-bottom:10px"/>
+    <select id="ev-type" style="margin-bottom:10px">
+      <option value="personal">Personal</option>
+      <option value="birthday">🎂 Birthday</option>
+      <option value="liam">🧒 Daniel</option>
+      <option value="cake">🎂 Cake delivery</option>
+    </select>
+    <input id="ev-title" placeholder="Event title…" style="margin-bottom:10px"/>
+    <button onclick="addEvent()" style="width:100%;background:var(--purpleL);color:var(--purpleD);border-color:var(--purple);font-weight:600;padding:12px">Add to calendar</button>
+  </div>
+  <div class="card">
+    <div class="clabel">🎂 Birthdays</div>
+    <div id="bday-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="add-row-btn" onclick="addBirthday()">＋ Add birthday</button>
+  </div>
+  <div class="card">
+    <div class="clabel">All events</div>
+    <div id="ev-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+
+<div class="page" id="page-habits">
+  <div class="ptitle">🔄 Habits</div>
+  <div class="card" style="overflow-x:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="clabel" style="margin:0">This week</div>
+      <button onclick="addHabit()" style="padding:8px 12px;font-size:13px">＋ Add</button>
+    </div>
+    <table class="htable" id="htable" style="min-width:400px"></table>
+  </div>
+</div>
+
 <div class="page" id="page-orders">
   <div class="ptitle">🎂 Cake orders</div>
-  <div style="display:flex;gap:8px;margin-bottom:4px;flex-wrap:wrap">
-    <button onclick="addOrder()" style="background:var(--pinkL);border-color:var(--pink);color:var(--pinkD);font-weight:600">＋ New order</button>
-    <div style="display:flex;gap:6px;align-items:center;font-size:12px">
-      <span class="pill" style="background:var(--redL);color:var(--red)">🔴 Urgent</span>
-      <span class="pill" style="background:var(--amberL);color:#7a5010">🟡 Upcoming</span>
-      <span class="pill" style="background:var(--tealL);color:var(--tealD)">🟢 Confirmed</span>
-    </div>
+  <button onclick="addOrder()" style="background:var(--pinkL);border-color:var(--pink);color:var(--pinkD);font-weight:700;width:100%;padding:13px;font-size:15px">＋ New order</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <span class="pill" style="background:var(--redL);color:var(--red)">🔴 Urgent</span>
+    <span class="pill" style="background:var(--amberL);color:#7a5010">🟡 Upcoming</span>
+    <span class="pill" style="background:var(--tealL);color:var(--tealD)">🟢 Confirmed</span>
   </div>
-  <div id="orders-list" style="display:flex;flex-direction:column;gap:10px"></div>
+  <div id="orders-list" style="display:flex;flex-direction:column;gap:12px"></div>
 </div>
 
-<!-- DELIVERIES -->
 <div class="page" id="page-delivery">
-  <div class="ptitle">🚗 Delivery schedule</div>
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="clabel">Upcoming deliveries</div>
-        <div id="delivery-list" style="display:flex;flex-direction:column;gap:8px"></div>
-        <button class="add-row-btn" onclick="addDelivery()">＋ Add delivery</button>
-      </div>
+  <div class="ptitle">🚗 Deliveries</div>
+  <div class="card">
+    <div class="clabel">Delivery zones</div>
+    <div id="zone-list">
+      <div class="ti"><input class="bare-in" value="Burlington – Free"/></div>
+      <div class="ti"><input class="bare-in" value="Hamilton – $10"/></div>
+      <div class="ti"><input class="bare-in" value="Oakville – $12"/></div>
+      <div class="ti"><input class="bare-in" value="Mississauga – $15"/></div>
     </div>
-    <div class="col" style="max-width:220px">
-      <div class="card">
-        <div class="clabel">Delivery zones</div>
-        <div style="display:flex;flex-direction:column;gap:0">
-          <div class="ti"><input class="bare-in" value="Burlington – Free"/></div>
-          <div class="ti"><input class="bare-in" value="Hamilton – $10"/></div>
-          <div class="ti"><input class="bare-in" value="Oakville – $12"/></div>
-          <div class="ti"><input class="bare-in" value="Mississauga – $15"/></div>
-        </div>
-        <button class="add-row-btn" onclick="addZone()">＋ Add zone</button>
-      </div>
-      <div class="card">
-        <div class="clabel">Delivery notes</div>
-        <textarea style="width:100%;min-height:90px;resize:none;font-size:12px;line-height:1.6;border:none;background:transparent;outline:none;color:var(--text)" placeholder="Car availability, helper needed, packaging reminders…"></textarea>
-      </div>
-    </div>
+    <button class="add-row-btn" onclick="addZone()">＋ Add zone</button>
+  </div>
+  <div class="card">
+    <div class="clabel">Upcoming deliveries</div>
+    <div id="delivery-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button class="add-row-btn" onclick="addDelivery()">＋ Add delivery</button>
+  </div>
+  <div class="card">
+    <div class="clabel">Notes</div>
+    <textarea style="width:100%;min-height:80px;resize:none;font-size:14px;line-height:1.6;border:none;background:transparent;outline:none;color:var(--text)" placeholder="Car availability, packaging reminders…"></textarea>
   </div>
 </div>
 
-<!-- FLAVORS & PRICING -->
 <div class="page" id="page-recipes">
   <div class="ptitle">🍰 Flavors & pricing</div>
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="clabel" style="margin:0">Cake menu</div>
-          <button onclick="addFlavor()" style="font-size:11px;padding:4px 9px">＋ Add flavor</button>
-        </div>
-        <div id="flavor-list"></div>
-      </div>
+  <div class="card">
+    <div class="clabel">Quick pricing</div>
+    <div style="display:flex;flex-direction:column;gap:0;font-size:14px">
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">6" (6–8 people)</span><input class="bare-in" value="$55" style="width:55px;text-align:right;font-weight:700;color:var(--purple)"/></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">8" (10–12 people)</span><input class="bare-in" value="$75" style="width:55px;text-align:right;font-weight:700;color:var(--purple)"/></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">10" (16–20 people)</span><input class="bare-in" value="$100" style="width:55px;text-align:right;font-weight:700;color:var(--purple)"/></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0"><span style="color:var(--text2)">Cupcakes (dozen)</span><input class="bare-in" value="$38" style="width:55px;text-align:right;font-weight:700;color:var(--purple)"/></div>
     </div>
-    <div class="col" style="max-width:220px">
-      <div class="card">
-        <div class="clabel">Quick pricing guide</div>
-        <div style="display:flex;flex-direction:column;gap:0;font-size:12.5px">
-          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">6" (6–8 servings)</span><input class="bare-in" value="$55" style="width:50px;text-align:right;font-weight:600;color:var(--purple)"/></div>
-          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">8" (10–12 servings)</span><input class="bare-in" value="$75" style="width:50px;text-align:right;font-weight:600;color:var(--purple)"/></div>
-          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">10" (16–20 servings)</span><input class="bare-in" value="$100" style="width:50px;text-align:right;font-weight:600;color:var(--purple)"/></div>
-          <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:var(--text2)">Cupcakes (dozen)</span><input class="bare-in" value="$38" style="width:50px;text-align:right;font-weight:600;color:var(--purple)"/></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="clabel">Monthly revenue</div>
-        <div style="display:flex;align-items:baseline;gap:3px"><span style="font-size:18px;color:var(--text3)">$</span><input type="number" value="1240" style="font-size:24px;font-weight:700;color:var(--teal);border:none;background:transparent;outline:none;width:110px"/></div>
-        <div style="font-size:11.5px;color:var(--text3);margin-top:4px">Update as orders come in</div>
-      </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="clabel" style="margin:0">Cake menu</div>
+      <button onclick="addFlavor()" style="padding:8px 12px;font-size:13px">＋ Add</button>
+    </div>
+    <div id="flavor-list"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">Monthly revenue</div>
+    <div style="display:flex;align-items:baseline;gap:4px">
+      <span style="font-size:20px;color:var(--text3)">$</span>
+      <input type="number" value="1240" style="font-size:28px;font-weight:700;color:var(--teal);border:none;background:transparent;outline:none;width:140px"/>
     </div>
   </div>
 </div>
 
-<!-- BUDGET -->
 <div class="page" id="page-budget">
   <div class="ptitle">💰 Budget</div>
-  <div class="row">
-    <div class="col" style="max-width:200px">
-      <div class="card">
-        <div class="clabel">Monthly income</div>
-        <div style="display:flex;align-items:baseline;gap:4px">
-          <span style="font-size:18px;color:var(--text3)">$</span>
-          <input type="number" id="income" value="3800" oninput="renderBudget()" style="font-size:22px;font-weight:700;border:none;background:transparent;outline:none;width:100px;color:var(--text)"/>
-        </div>
-        <div style="font-size:10.5px;color:var(--text3);margin-top:4px">Includes cake biz income</div>
-      </div>
-      <div class="card" id="b-summary"></div>
+  <div class="card">
+    <div class="clabel">Monthly income</div>
+    <div style="display:flex;align-items:baseline;gap:4px">
+      <span style="font-size:20px;color:var(--text3)">$</span>
+      <input type="number" id="income" value="3800" oninput="renderBudget()" style="font-size:28px;font-weight:700;border:none;background:transparent;outline:none;width:140px;color:var(--text)"/>
     </div>
-    <div class="col">
-      <div class="card">
-        <div class="clabel">Expenses</div>
-        <div id="b-rows"></div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;font-weight:700;color:var(--text);border-top:1px solid var(--border);margin-top:4px" id="b-total"></div>
-        <button onclick="addBRow()" style="margin-top:8px;font-size:12px">＋ Add expense</button>
-      </div>
-    </div>
+    <div style="font-size:11.5px;color:var(--text3);margin-top:4px">Salary + cake business</div>
+  </div>
+  <div class="card" id="b-summary"></div>
+  <div class="card">
+    <div class="clabel">Expenses</div>
+    <div id="b-rows"></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:15px;font-weight:700;color:var(--text);border-top:1px solid var(--border);margin-top:4px" id="b-total"></div>
+    <button onclick="addBRow()" style="margin-top:8px;width:100%;padding:12px">＋ Add expense</button>
   </div>
 </div>
 
-<!-- MEALS -->
 <div class="page" id="page-meals">
-  <div class="ptitle">🥗 Meal planner</div>
-  <div class="card"><div id="meal-container"></div></div>
+  <div class="ptitle">🥗 Meals</div>
+  <div class="card" style="overflow-x:auto"><div id="meal-container"></div></div>
   <div class="card">
     <div class="clabel">Grocery list</div>
     <div id="grocery-list"></div>
@@ -451,27 +386,24 @@ input:focus,textarea:focus,select:focus{border-color:var(--purple)}
   </div>
 </div>
 
-<!-- NOTES -->
 <div class="page" id="page-notes">
   <div class="ptitle">📝 Notes</div>
-  <div class="row" style="flex:1">
-    <div class="col" style="max-width:165px">
-      <div class="card" style="padding:10px">
-        <div class="clabel" style="margin-bottom:8px">Pages</div>
-        <div id="note-pages" style="display:flex;flex-direction:column;gap:3px"></div>
-        <button class="add-row-btn" onclick="addNotePage()" style="margin-top:6px;font-size:12px">＋ New page</button>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card">
-        <input id="note-title" style="width:100%;font-size:15px;font-weight:700;border:none;background:transparent;outline:none;font-family:inherit;margin-bottom:10px;color:var(--text)" placeholder="Page title…"/>
-        <textarea id="note-body" style="width:100%;border:none;background:transparent;font-size:12.5px;color:var(--text);font-family:inherit;resize:none;outline:none;min-height:380px;line-height:1.9em;background-image:repeating-linear-gradient(transparent,transparent calc(1.9em - 1px),var(--border) calc(1.9em - 1px),var(--border) 1.9em);background-size:100% 1.9em" placeholder="Start writing…"></textarea>
-      </div>
-    </div>
+  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px" id="note-tabs"></div>
+  <div class="card" style="flex:1">
+    <input id="note-title" style="width:100%;font-size:17px;font-weight:700;border:none;background:transparent;outline:none;font-family:inherit;margin-bottom:12px;color:var(--text)" placeholder="Page title…"/>
+    <textarea id="note-body" style="width:100%;border:none;background:transparent;font-size:14px;color:var(--text);font-family:inherit;resize:none;outline:none;min-height:300px;line-height:1.9em;background-image:repeating-linear-gradient(transparent,transparent calc(1.9em - 1px),var(--border) calc(1.9em - 1px),var(--border) 1.9em);background-size:100% 1.9em" placeholder="Start writing…"></textarea>
   </div>
+  <button class="add-row-btn" onclick="addNotePage()">＋ New page</button>
 </div>
 
-</main>
+</div>
+
+<div class="bottom-nav">
+  <button class="bnav-item active" id="bnav-daily" onclick="show('daily')"><span class="icon">🗓️</span><span>Today</span></button>
+  <button class="bnav-item" id="bnav-liam" onclick="show('liam')"><span class="icon">🧒</span><span>Daniel</span></button>
+  <button class="bnav-item" id="bnav-orders" onclick="show('orders')"><span class="icon">🎂</span><span>Orders</span></button>
+  <button class="bnav-item" id="bnav-calendar" onclick="show('calendar')"><span class="icon">📅</span><span>Calendar</span></button>
+  <button class="bnav-item" id="bnav-more" onclick="openDrawer()"><span class="icon">☰</span><span>More</span></button>
 </div>
 
 <script>
@@ -479,229 +411,104 @@ const today=new Date();
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-document.getElementById('sb-date').textContent=DAYS[today.getDay()].slice(0,3)+', '+MONTHS[today.getMonth()].slice(0,3)+' '+today.getDate()+', '+today.getFullYear();
-document.getElementById('daily-date').textContent=DAYS[today.getDay()]+', '+MONTHS[today.getMonth()]+' '+today.getDate()+', '+today.getFullYear();
-
-function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');document.getElementById('nav-'+id).classList.add('active');}
-function setMood(btn){document.querySelectorAll('#mood-btns button').forEach(b=>b.style.cssText='');btn.style.background='var(--purpleL)';btn.style.borderColor='var(--purple)';btn.style.color='var(--purpleD)';}
-function esc(s){return(s||'').replace(/"/g,'&quot;');}
-
-// SCHEDULE
+document.getElementById('sb-date').textContent=DAYS[today.getDay()].slice(0,3)+', '+MONTHS[today.getMonth()]+' '+today.getDate()+', '+today.getFullYear();
+function esc(s){return(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('overlay').classList.add('open');}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.dr-item').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.bnav-item').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');if(document.getElementById('nav-'+id))document.getElementById('nav-'+id).classList.add('active');if(document.getElementById('bnav-'+id))document.getElementById('bnav-'+id).classList.add('active');document.querySelector('.main').scrollTop=0;closeDrawer();}
+function setMood(btn){document.querySelectorAll('#mood-btns button').forEach(b=>{b.style.background='';b.style.borderColor='';b.style.color='';});btn.style.background='var(--purpleL)';btn.style.borderColor='var(--purple)';btn.style.color='var(--purpleD)';}
 const hw=document.getElementById('hours-wrap');
 ['6 AM','7 AM','8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM','9 PM','10 PM'].forEach(h=>{const r=document.createElement('div');r.className='hour-row';r.innerHTML=`<span class="hlbl">${h}</span><textarea class="hin" rows="1" placeholder="…"></textarea>`;const ta=r.querySelector('textarea');ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';});hw.appendChild(r);});
-
-// TODOS
 let todos=[];
 function addTodo(text=''){todos.push({id:Date.now()+Math.random(),text,done:false});renderTodos();}
-function renderTodos(){const el=document.getElementById('todo-list');el.innerHTML='';todos.forEach(t=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${t.done?'checked':''} onchange="toggleTodo('${t.id}')"><input class="tin" value="${esc(t.text)}" placeholder="Task…" style="${t.done?'text-decoration:line-through;color:var(--text3)':''}" oninput="updTodo('${t.id}',this.value)"><button class="xbtn" onclick="delTodo('${t.id}')">×</button>`;el.appendChild(d);});}
+function renderTodos(){const el=document.getElementById('todo-list');el.innerHTML='';todos.forEach(t=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${t.done?'checked':''} onchange="toggleTodo('${t.id}')"><input class="tin" value="${esc(t.text)}" placeholder="Task…" style="${t.done?'text-decoration:line-through;color:var(--text3)':''};font-size:15px" oninput="updTodo('${t.id}',this.value)"><button class="xbtn" onclick="delTodo('${t.id}')">×</button>`;el.appendChild(d);});}
 function toggleTodo(id){const t=todos.find(x=>x.id==id);if(t)t.done=!t.done;renderTodos();}
 function updTodo(id,v){const t=todos.find(x=>x.id==id);if(t)t.text=v;}
 function delTodo(id){todos=todos.filter(x=>x.id!=id);renderTodos();}
 ['Pick up Daniel from soccer','Bake strawberry cake (due Fri)','Refill Daniel\'s prescription','Grocery run','Reply to cake inquiry'].forEach(addTodo);
-
-// WATER
 let wFilled=0;
 const dg=document.getElementById('drop-grid');
 for(let i=0;i<8;i++){const d=document.createElement('div');d.className='drop';d.textContent='💧';d.dataset.i=i;d.onclick=()=>{wFilled=+d.dataset.i+1;document.querySelectorAll('.drop').forEach((x,j)=>x.classList.toggle('on',j<wFilled));document.getElementById('wc').textContent=wFilled;};dg.appendChild(d);}
-
-// SELF-CARE
 let selfcare=[];
-function addSelfcare(text=''){selfcare.push({id:Date.now()+Math.random(),text,done:false});renderSelfcare();}
-function renderSelfcare(){const el=document.getElementById('selfcare-list');el.innerHTML='';selfcare.forEach(t=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${t.done?'checked':''} onchange="toggleSC('${t.id}')"><input class="tin" value="${esc(t.text)}" placeholder="Self-care win…" style="${t.done?'text-decoration:line-through;color:var(--text3)':''}"><button class="xbtn" onclick="delSC('${t.id}')">×</button>`;el.appendChild(d);});}
-function toggleSC(id){const t=selfcare.find(x=>x.id==id);if(t)t.done=!t.done;renderSelfcare();}
-function delSC(id){selfcare=selfcare.filter(x=>x.id!=id);renderSelfcare();}
+function addSelfcare(t=''){selfcare.push({id:Date.now()+Math.random(),text:t,done:false});renderSC();}
+function renderSC(){const el=document.getElementById('selfcare-list');el.innerHTML='';selfcare.forEach(t=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${t.done?'checked':''} onchange="tgSC('${t.id}')"><input class="tin" value="${esc(t.text)}" placeholder="Self-care win…" style="${t.done?'text-decoration:line-through;color:var(--text3)':''}"><button class="xbtn" onclick="delSC('${t.id}')">×</button>`;el.appendChild(d);});}
+function tgSC(id){const t=selfcare.find(x=>x.id==id);if(t)t.done=!t.done;renderSC();}
+function delSC(id){selfcare=selfcare.filter(x=>x.id!=id);renderSC();}
 ['Went for a walk','5 min meditation','Called a friend'].forEach(addSelfcare);
-
-// MEDS
 let meds={daniel:[{name:'Ritalin 10mg',times:['Morning','Noon'],icon:'💊'},{name:'Vitamin D',times:['Morning'],icon:'🌟'}],mom:[{name:'Iron supplement',times:['Morning'],icon:'💊'}]};
 let medDone={};
-function renderMeds(){
-  [{key:'daniel',elId:'liam-meds'},{key:'mom',elId:'mom-meds'}].forEach(({key,elId})=>{
-    const el=document.getElementById(elId);el.innerHTML='';
-    meds[key].forEach((m,mi)=>{
-      const row=document.createElement('div');row.className='med-row';
-      const checks=m.times.map((t,ti)=>{const k=key+'_'+mi+'_'+ti;return`<div><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">${t}</div><div class="med-cb${medDone[k]?' on':''}" onclick="toggleMed('${k}')">${medDone[k]?'✓':''}</div></div>`;}).join('');
-      row.innerHTML=`<div class="med-icon">${m.icon}</div><div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text)">${m.name}</div><div style="font-size:11px;color:var(--text3)">${m.times.join(' · ')}</div></div><div class="med-checks">${checks}</div><button onclick="delMed('${key}',${mi})" style="font-size:14px;padding:2px 5px;color:var(--text3)">×</button>`;
-      el.appendChild(row);
-    });
-    if(!meds[key].length)el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">No medications added</div>';
-  });
-  renderQuickMeds();
-}
-function toggleMed(k){medDone[k]=!medDone[k];renderMeds();}
+function renderMeds(){[{key:'daniel',elId:'liam-meds'},{key:'mom',elId:'mom-meds'}].forEach(({key,elId})=>{const el=document.getElementById(elId);el.innerHTML='';meds[key].forEach((m,mi)=>{const row=document.createElement('div');row.className='med-row';const checks=m.times.map((t,ti)=>{const k=key+'_'+mi+'_'+ti;return`<div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:3px">${t}</div><div class="med-cb${medDone[k]?' on':''}" onclick="tgMed('${k}')">${medDone[k]?'✓':''}</div></div>`;}).join('');row.innerHTML=`<div class="med-icon">${m.icon}</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">${m.name}</div><div style="font-size:12px;color:var(--text3)">${m.times.join(' · ')}</div></div><div style="display:flex;gap:6px">${checks}</div><button onclick="delMed('${key}',${mi})" style="font-size:18px;padding:4px 6px;color:var(--text3)">×</button>`;el.appendChild(row);});if(!meds[key].length)el.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0">No medications added</div>';});renderMedStat();}
+function tgMed(k){medDone[k]=!medDone[k];renderMeds();}
 function delMed(who,i){meds[who].splice(i,1);renderMeds();}
 function addMed(who){const n=prompt('Medication name:');if(!n)return;const t=prompt('Times (e.g. Morning, Evening):','Morning');meds[who].push({name:n,times:(t||'Morning').split(',').map(s=>s.trim()),icon:'💊'});renderMeds();}
 renderMeds();
-
-function renderQuickMeds(){
-  const el=document.getElementById('quick-meds');if(!el)return;
-  const all=[...meds.daniel.map(m=>({...m,who:'Daniel'})),...meds.mom.map(m=>({...m,who:'Liz'}))];
-  el.innerHTML=all.map(m=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${m.icon} ${m.name} <span style="color:var(--text3)">(${m.who})</span></span><span class="pill" style="background:var(--purpleL);color:var(--purpleD)">${m.times[0]}</span></div>`).join('')||'<div style="font-size:12px;color:var(--text3)">None added</div>';
-}
-
-// ACTIVITIES
+function renderMedStat(){const el=document.getElementById('med-stat');if(!el)return;const all=[...meds.daniel.map(m=>({...m,who:'Daniel'})),...meds.mom.map(m=>({...m,who:'Liz'}))];el.innerHTML=all.slice(0,2).map(m=>`<div style="margin-bottom:2px">${m.icon} ${m.name}</div>`).join('')+(all.length>2?`<div style="color:var(--text3);font-size:11px">+${all.length-2} more</div>`:'');}
 let activities=[{day:'Mon',name:'Soccer practice',time:'4:00 PM',note:'Bring shin guards'},{day:'Wed',name:'Swimming',time:'3:30 PM',note:'Towel + goggles'},{day:'Thu',name:'Tutoring (Math)',time:'5:00 PM',note:'Online via Zoom'},{day:'Sat',name:'Soccer game',time:'10:00 AM',note:'Home field'}];
-function renderActivities(){
-  const el=document.getElementById('activity-list');el.innerHTML='';
-  const order=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  [...activities].sort((a,b)=>order.indexOf(a.day)-order.indexOf(b.day)).forEach((a,i)=>{
-    const row=document.createElement('div');row.className='act-row';
-    row.innerHTML=`<span class="act-day">${a.day}</span><div style="flex:1"><div><input class="bare-in" value="${esc(a.name)}" style="font-weight:500" oninput="activities[${i}].name=this.value"/></div><div><input class="bare-in" value="${esc(a.note)}" style="font-size:10.5px;color:var(--text3)" oninput="activities[${i}].note=this.value"/></div></div><input class="bare-in" value="${a.time}" style="font-size:11px;color:var(--text2);text-align:right;width:60px" oninput="activities[${i}].time=this.value"/><button onclick="delAct(${i})" style="font-size:14px;padding:2px 4px;color:var(--text3)">×</button>`;
-    el.appendChild(row);
-  });
-  renderQuickActs();
-}
+function renderActivities(){const el=document.getElementById('activity-list');el.innerHTML='';const order=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];[...activities].sort((a,b)=>order.indexOf(a.day)-order.indexOf(b.day)).forEach((a,i)=>{const row=document.createElement('div');row.className='act-row';row.innerHTML=`<span class="act-day-badge">${a.day}</span><div style="flex:1"><input class="bare-in" value="${esc(a.name)}" style="font-weight:600;font-size:14px" oninput="activities[${i}].name=this.value"/><div style="display:flex;gap:8px;margin-top:3px"><input class="bare-in" value="${esc(a.note)}" style="font-size:12px;color:var(--text3);flex:1" oninput="activities[${i}].note=this.value"/><input class="bare-in" value="${a.time}" style="font-size:12px;color:var(--text2);text-align:right;width:65px" oninput="activities[${i}].time=this.value"/></div></div><button onclick="delAct(${i})" style="font-size:18px;padding:4px 6px;color:var(--text3)">×</button>`;el.appendChild(row);});renderQuickActs();}
 function delAct(i){activities.splice(i,1);renderActivities();}
 function addActivity(){const d=prompt('Day (Mon-Sun):','Mon');const n=prompt('Activity name:');const t=prompt('Time:','4:00 PM');if(d&&n)activities.push({day:d,name:n,time:t||'',note:''});renderActivities();}
 renderActivities();
-
-function renderQuickActs(){
-  const el=document.getElementById('quick-activities');if(!el)return;
-  const todayDayName=DAYS[today.getDay()].slice(0,3);
-  const todayActs=activities.filter(a=>a.day===todayDayName);
-  el.innerHTML=todayActs.length?todayActs.map(a=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">⚽ ${a.name} <span style="color:var(--text3)">${a.time}</span></div>`).join(''):'<div style="font-size:12px;color:var(--text3)">Free afternoon 🎉</div>';
-}
-
-// DANIEL CHECKLIST
+function renderQuickActs(){const el=document.getElementById('quick-activities');if(!el)return;const dn=DAYS[today.getDay()].slice(0,3);const acts=activities.filter(a=>a.day===dn);el.innerHTML=acts.length?acts.map(a=>`<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border)"><span>⚽ ${a.name}</span><span style="color:var(--text3)">${a.time}</span></div>`).join(''):'<div style="font-size:14px;color:var(--text3)">Free afternoon 🎉</div>';}
 let liamItems=[];
-function addLiamItem(text=''){liamItems.push({id:Date.now()+Math.random(),text,done:false});renderLiamList();}
-function renderLiamList(){const el=document.getElementById('liam-checklist');el.innerHTML='';liamItems.forEach(t=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${t.done?'checked':''} onchange="toggleLiam('${t.id}')"><input class="tin" value="${esc(t.text)}" placeholder="Item needed…" style="${t.done?'text-decoration:line-through;color:var(--text3)':''}"><button class="xbtn" onclick="delLiam('${t.id}')">×</button>`;el.appendChild(d);});}
-function toggleLiam(id){const t=liamItems.find(x=>x.id==id);if(t)t.done=!t.done;renderLiamList();}
-function delLiam(id){liamItems=liamItems.filter(x=>x.id!=id);renderLiamList();}
-['Soccer cleats (new pair needed)','Permission slip – field trip','Library books – return Thu','Show-and-tell item (Mon)'].forEach(addLiamItem);
-
-// DANIEL GOALS
+function addLiamItem(t=''){liamItems.push({id:Date.now()+Math.random(),text:t,done:false});renderLiam();}
+function renderLiam(){const el=document.getElementById('liam-checklist');el.innerHTML='';liamItems.forEach(t=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${t.done?'checked':''} onchange="tgLiam('${t.id}')"><input class="tin" value="${esc(t.text)}" placeholder="Item…" style="${t.done?'text-decoration:line-through;color:var(--text3)':''}"><button class="xbtn" onclick="dlLiam('${t.id}')">×</button>`;el.appendChild(d);});}
+function tgLiam(id){const t=liamItems.find(x=>x.id==id);if(t)t.done=!t.done;renderLiam();}
+function dlLiam(id){liamItems=liamItems.filter(x=>x.id!=id);renderLiam();}
+['Soccer cleats (new pair needed)','Permission slip – field trip','Library books – return Thu'].forEach(addLiamItem);
 const danielGoals=[{e:'⚽',label:'Soccer skills',prog:60,color:'#d99520'},{e:'📚',label:'Reading level',prog:75,color:'#7c6fcd'},{e:'🏊',label:'Swimming badge',prog:40,color:'#1a9e74'}];
 const lge=document.getElementById('liam-goals');
-danielGoals.forEach(g=>{lge.innerHTML+=`<div><div style="display:flex;justify-content:space-between;font-size:12px"><span>${g.e} ${g.label}</span><span style="color:var(--text3)">${g.prog}%</span></div><div class="pbar"><div class="pfill" style="width:${g.prog}%;background:${g.color}"></div></div></div>`;});
-
-// CALENDAR
+danielGoals.forEach(g=>{lge.innerHTML+=`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${g.e} ${g.label}</span><span style="color:var(--text3)">${g.prog}%</span></div><div class="pbar"><div class="pfill" style="width:${g.prog}%;background:${g.color}"></div></div></div>`;});
 let cY=today.getFullYear(),cM=today.getMonth(),events=[];
 const evColors={personal:'#7c6fcd',birthday:'#d63b8a',liam:'#d99520',cake:'#d63c3c'};
-function renderCal(){
-  document.getElementById('cal-lbl').textContent=MONTHS[cM]+' '+cY;
-  const g=document.getElementById('cal-grid');
-  g.innerHTML=['S','M','T','W','T','F','S'].map(d=>`<div class="chd">${d}</div>`).join('');
-  const first=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate(),prev=new Date(cY,cM,0).getDate();
-  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cd other';d.innerHTML=`<span class="dn">${prev-first+1+i}</span>`;g.appendChild(d);}
-  for(let i=1;i<=dim;i++){
-    const d=document.createElement('div');d.className='cd';
-    const iT=i===today.getDate()&&cM===today.getMonth()&&cY===today.getFullYear();if(iT)d.classList.add('today');
-    const ds=`${cY}-${String(cM+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-    const evs=events.filter(e=>e.date===ds);
-    d.innerHTML=`<span class="dn">${i}</span><div style="display:flex;flex-wrap:wrap;gap:1px;margin-top:2px">${evs.map(e=>`<span class="ev-dot" style="background:${evColors[e.type]||'#999'}" title="${e.title}"></span>`).join('')}</div>`;
-    g.appendChild(d);
-  }
-  const trail=42-(first+dim);for(let i=1;i<=trail;i++){const d=document.createElement('div');d.className='cd other';d.innerHTML=`<span class="dn">${i}</span>`;g.appendChild(d);}
-  renderEL();
-}
+function renderCal(){document.getElementById('cal-lbl').textContent=MONTHS[cM]+' '+cY;const g=document.getElementById('cal-grid');g.innerHTML=['S','M','T','W','T','F','S'].map(d=>`<div class="chd">${d}</div>`).join('');const first=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate(),prev=new Date(cY,cM,0).getDate();for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cd other';d.innerHTML=`<span class="dn">${prev-first+1+i}</span>`;g.appendChild(d);}for(let i=1;i<=dim;i++){const d=document.createElement('div');d.className='cd';const iT=i===today.getDate()&&cM===today.getMonth()&&cY===today.getFullYear();if(iT)d.classList.add('today');const ds=`${cY}-${String(cM+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;const evs=events.filter(e=>e.date===ds);d.innerHTML=`<span class="dn">${i}</span><div style="display:flex;flex-wrap:wrap;gap:1px;margin-top:2px">${evs.map(e=>`<span class="ev-dot" style="background:${evColors[e.type]||'#999'}"></span>`).join('')}</div>`;g.appendChild(d);}const trail=42-(first+dim);for(let i=1;i<=trail;i++){const d=document.createElement('div');d.className='cd other';d.innerHTML=`<span class="dn">${i}</span>`;g.appendChild(d);}renderEL();}
 function chMonth(dir){cM+=dir;if(cM>11){cM=0;cY++;}else if(cM<0){cM=11;cY--;}renderCal();}
 function addEvent(){const date=document.getElementById('ev-date').value,title=document.getElementById('ev-title').value,type=document.getElementById('ev-type').value;if(!date||!title)return;events.push({date,title,type});document.getElementById('ev-title').value='';renderCal();}
-function renderEL(){const el=document.getElementById('ev-list');el.innerHTML='';[...events].sort((a,b)=>a.date.localeCompare(b.date)).forEach((e,i)=>{const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:7px;font-size:12px';d.innerHTML=`<span class="ev-dot" style="background:${evColors[e.type]||'#999'};flex-shrink:0"></span><span style="color:var(--text3);flex-shrink:0">${e.date}</span><span style="flex:1;color:var(--text)">${e.title}</span><button onclick="events.splice(${i},1);renderCal()" style="font-size:12px;padding:2px 5px;color:var(--text3)">×</button>`;el.appendChild(d);});}
-[{date:`${today.getFullYear()}-06-12`,title:"Daniel's soccer tournament",type:'liam'},{date:`${today.getFullYear()}-06-15`,title:"Liz's birthday 🎂",type:'birthday'},{date:`${today.getFullYear()}-06-20`,title:'Chocolate cake – Rodriguez delivery',type:'cake'},{date:`${today.getFullYear()}-06-08`,title:'Strawberry cake – Johnson pickup',type:'cake'}].forEach(e=>events.push(e));
+function renderEL(){const el=document.getElementById('ev-list');el.innerHTML='';[...events].sort((a,b)=>a.date.localeCompare(b.date)).forEach((e,i)=>{const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border)';d.innerHTML=`<span class="ev-dot" style="background:${evColors[e.type]||'#999'};flex-shrink:0;width:8px;height:8px"></span><span style="color:var(--text3);font-size:12px;flex-shrink:0">${e.date}</span><span style="flex:1">${e.title}</span><button onclick="events.splice(${i},1);renderCal()" style="font-size:16px;padding:2px 6px;color:var(--text3)">×</button>`;el.appendChild(d);});}
+[{date:`${today.getFullYear()}-06-12`,title:"Daniel's soccer tournament",type:'liam'},{date:`${today.getFullYear()}-06-15`,title:"Liz's birthday 🎂",type:'birthday'},{date:`${today.getFullYear()}-06-20`,title:'Chocolate cake – Rodriguez',type:'cake'},{date:`${today.getFullYear()}-06-08`,title:'Strawberry cake – Johnson pickup',type:'cake'}].forEach(e=>events.push(e));
 renderCal();
-
-// BIRTHDAYS
 let birthdays=[];
 function addBirthday(){const n=prompt('Name:');const d=prompt('Date (MM-DD):');if(n&&d){birthdays.push({name:n,date:d});renderBdays();}}
-function renderBdays(){const el=document.getElementById('bday-list');el.innerHTML='';birthdays.forEach((b,i)=>{el.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;font-size:12.5px"><span>🎂</span><span style="flex:1;color:var(--text)">${b.name}</span><span class="pill" style="background:var(--pinkL);color:var(--pinkD)">${b.date}</span><button onclick="birthdays.splice(${i},1);renderBdays()" style="font-size:12px;padding:2px 5px;color:var(--text3)">×</button></div>`;});if(!birthdays.length)el.innerHTML='<div style="font-size:12px;color:var(--text3)">No birthdays added yet</div>';}
+function renderBdays(){const el=document.getElementById('bday-list');el.innerHTML='';birthdays.forEach((b,i)=>{const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:10px;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border)';d.innerHTML=`<span>🎂</span><span style="flex:1">${b.name}</span><span class="pill" style="background:var(--pinkL);color:var(--pinkD)">${b.date}</span><button onclick="birthdays.splice(${i},1);renderBdays()" style="font-size:16px;padding:2px 6px;color:var(--text3)">×</button>`;el.appendChild(d);});if(!birthdays.length)el.innerHTML='<div style="font-size:13px;color:var(--text3)">No birthdays added yet</div>';}
 [{name:'Liz',date:'06-15'},{name:'Daniel',date:'09-14'},{name:'Aunt Maria',date:'07-22'},{name:"Daniel's friend Jake",date:'08-03'}].forEach(b=>birthdays.push(b));
 renderBdays();
-
-// HABITS
-let habits=[{name:"Give Daniel his meds",e:'💊'},{name:'30 min me-time',e:'🧘'},{name:'Exercise',e:'🏃'},{name:'Check cake orders',e:'🎂'},{name:'Drink 8 glasses',e:'💧'}],hDone={};
-function renderHabits(){const tbl=document.getElementById('htable');tbl.innerHTML=`<tr><th style="text-align:left;padding-left:4px">Habit</th>${WDAYS.map(d=>`<th>${d}</th>`).join('')}<th>%</th></tr>`;habits.forEach((h,hi)=>{const pct=Math.round(WDAYS.filter((_,di)=>hDone[hi+'_'+di]).length/7*100);const row=document.createElement('tr');row.innerHTML=`<td style="font-size:12px"><span style="margin-right:5px">${h.e}</span>${h.name}</td>${WDAYS.map((_,di)=>`<td><div class="hc${hDone[hi+'_'+di]?' on':''}" onclick="tgH(${hi},${di})">${hDone[hi+'_'+di]?'✓':''}</div></td>`).join('')}<td style="text-align:center;font-size:11px;color:${pct>=70?'var(--teal)':'var(--text3)'}">${pct}%</td>`;tbl.appendChild(row);});}
+let habits=[{name:"Daniel's meds",e:'💊'},{name:'30 min me-time',e:'🧘'},{name:'Exercise',e:'🏃'},{name:'Check cake orders',e:'🎂'},{name:'Drink 8 glasses',e:'💧'}],hDone={};
+function renderHabits(){const tbl=document.getElementById('htable');tbl.innerHTML=`<tr><th style="text-align:left;padding-left:4px;min-width:100px">Habit</th>${WDAYS.map(d=>`<th style="min-width:32px">${d}</th>`).join('')}<th>%</th></tr>`;habits.forEach((h,hi)=>{const pct=Math.round(WDAYS.filter((_,di)=>hDone[hi+'_'+di]).length/7*100);const row=document.createElement('tr');row.innerHTML=`<td style="font-size:13px;padding-right:6px"><span style="margin-right:4px">${h.e}</span>${h.name}</td>${WDAYS.map((_,di)=>`<td><div class="hc${hDone[hi+'_'+di]?' on':''}" onclick="tgH(${hi},${di})">${hDone[hi+'_'+di]?'✓':''}</div></td>`).join('')}<td style="text-align:center;font-size:12px;color:${pct>=70?'var(--teal)':'var(--text3)'}">${pct}%</td>`;tbl.appendChild(row);});}
 function tgH(hi,di){hDone[hi+'_'+di]=!hDone[hi+'_'+di];renderHabits();}
 function addHabit(){const n=prompt('Habit name:');if(n){habits.push({name:n,e:'⭐'});renderHabits();}}
 renderHabits();
-
-// CAKE ORDERS
-let orders=[
-  {id:1,client:'Rodriguez Family',cake:'3-tier chocolate ganache',size:'10"',servings:20,flavor:'Chocolate',notes:'No nuts. Happy Birthday Rosa on top.',dueDate:'2026-06-20',deliveryType:'Delivery',address:'45 Oak St, Burlington',status:'upcoming',paid:false,price:120},
-  {id:2,client:'Johnson',cake:'Strawberry vanilla 2-layer',size:'8"',servings:12,flavor:'Strawberry',notes:'Pink flowers decoration.',dueDate:'2026-06-08',deliveryType:'Pickup',address:'',status:'urgent',paid:true,price:80},
-  {id:3,client:'Williams Wedding',cake:'5-tier white fondant',size:'Custom',servings:80,flavor:'Vanilla almond',notes:'Call for tasting appointment first.',dueDate:'2026-07-12',deliveryType:'Delivery',address:'Ritz Carlton Hamilton',status:'ready',paid:false,price:450},
-];
-function renderOrders(){
-  const el=document.getElementById('orders-list');el.innerHTML='';
-  orders.forEach((o,i)=>{
-    const card=document.createElement('div');card.className=`cake-card ${o.status}`;
-    const statusLabel={urgent:'🔴 Due soon',upcoming:'🟡 Upcoming',ready:'🟢 Confirmed'}[o.status]||o.status;
-    card.innerHTML=`
-      <div class="cake-status"><span class="pill" style="background:${o.status==='urgent'?'var(--redL)':o.status==='upcoming'?'var(--amberL)':'var(--tealL)'};color:${o.status==='urgent'?'var(--red)':o.status==='upcoming'?'#7a5010':'var(--tealD)'}">${statusLabel}</span></div>
-      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">🎂 ${o.client}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px;margin-bottom:8px">
-        <div><span style="color:var(--text3)">Cake:</span> <input class="bare-in" value="${esc(o.cake)}" style="font-size:12px" oninput="orders[${i}].cake=this.value"/></div>
-        <div><span style="color:var(--text3)">Size:</span> <input class="bare-in" value="${esc(o.size)}" style="font-size:12px;width:60px" oninput="orders[${i}].size=this.value"/></div>
-        <div><span style="color:var(--text3)">Flavor:</span> <input class="bare-in" value="${esc(o.flavor)}" style="font-size:12px" oninput="orders[${i}].flavor=this.value"/></div>
-        <div><span style="color:var(--text3)">Servings:</span> <input class="bare-in" type="number" value="${o.servings}" style="font-size:12px;width:50px" oninput="orders[${i}].servings=+this.value"/></div>
-        <div><span style="color:var(--text3)">Due:</span> <input class="bare-in" type="date" value="${o.dueDate}" style="font-size:12px" oninput="orders[${i}].dueDate=this.value"/></div>
-        <div><span style="color:var(--text3)">Price:</span> $<input class="bare-in" type="number" value="${o.price}" style="font-size:12px;color:var(--teal);font-weight:600;width:60px" oninput="orders[${i}].price=+this.value"/></div>
-        <div><span style="color:var(--text3)">Type:</span> <select onchange="orders[${i}].deliveryType=this.value;renderOrders()" style="font-size:11px;padding:2px 4px;height:22px"><option ${o.deliveryType==='Pickup'?'selected':''}>Pickup</option><option ${o.deliveryType==='Delivery'?'selected':''}>Delivery</option></select></div>
-        <div style="display:flex;align-items:center;gap:5px"><input type="checkbox" ${o.paid?'checked':''} onchange="orders[${i}].paid=this.checked;renderOrders()" style="accent-color:var(--teal)"><span style="color:${o.paid?'var(--teal)':'var(--red)'};font-weight:600;font-size:11.5px">${o.paid?'Paid ✓':'Unpaid'}</span></div>
-      </div>
-      ${o.deliveryType==='Delivery'?`<div style="font-size:12px;color:var(--text2);margin-bottom:6px">📍 <input class="bare-in" value="${esc(o.address)}" style="font-size:12px;color:var(--text2)" oninput="orders[${i}].address=this.value" placeholder="Delivery address…"/></div>`:''}
-      <div style="font-size:12px;background:var(--bg2);border-radius:6px;padding:7px"><span style="color:var(--text3)">Notes:</span> <input class="bare-in" value="${esc(o.notes)}" style="font-size:12px;color:var(--text2)" oninput="orders[${i}].notes=this.value" placeholder="Special requests, decorations…"/></div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <select onchange="orders[${i}].status=this.value;renderOrders()" style="font-size:11px;padding:3px 6px"><option value="urgent" ${o.status==='urgent'?'selected':''}>🔴 Urgent</option><option value="upcoming" ${o.status==='upcoming'?'selected':''}>🟡 Upcoming</option><option value="ready" ${o.status==='ready'?'selected':''}>🟢 Confirmed</option><option value="done">✅ Done</option></select>
-        <button onclick="orders.splice(${i},1);renderOrders()" style="font-size:11px;padding:3px 8px;color:var(--red);border-color:var(--redL)">Delete</button>
-      </div>`;
-    el.appendChild(card);
-  });
-  renderQuickCakes();
-}
-function addOrder(){orders.push({id:Date.now(),client:'New client',cake:'',size:'8"',servings:10,flavor:'',notes:'',dueDate:'',deliveryType:'Pickup',address:'',status:'upcoming',paid:false,price:0});renderOrders();}
+let orders=[{id:1,client:'Rodriguez Family',cake:'3-tier chocolate ganache',size:'10"',servings:20,flavor:'Chocolate',notes:'No nuts. Happy Birthday Rosa on top.',dueDate:'2026-06-20',deliveryType:'Delivery',address:'45 Oak St, Burlington',status:'upcoming',paid:false,price:120},{id:2,client:'Johnson',cake:'Strawberry vanilla 2-layer',size:'8"',servings:12,flavor:'Strawberry',notes:'Pink flowers decoration.',dueDate:'2026-06-08',deliveryType:'Pickup',address:'',status:'urgent',paid:true,price:80},{id:3,client:'Williams Wedding',cake:'5-tier white fondant',size:'Custom',servings:80,flavor:'Vanilla almond',notes:'Tasting appointment first.',dueDate:'2026-07-12',deliveryType:'Delivery',address:'Ritz Carlton Hamilton',status:'ready',paid:false,price:450}];
+function renderOrders(){const el=document.getElementById('orders-list');el.innerHTML='';orders.forEach((o,i)=>{const card=document.createElement('div');card.className=`cake-card ${o.status}`;const sc={urgent:'🔴 Due soon',upcoming:'🟡 Upcoming',ready:'🟢 Confirmed'}[o.status]||o.status;const sc_style={urgent:`background:var(--redL);color:var(--red)`,upcoming:`background:var(--amberL);color:#7a5010`,ready:`background:var(--tealL);color:var(--tealD)`}[o.status]||'';card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div style="font-size:15px;font-weight:700;color:var(--text)">🎂 ${o.client}</div><span class="pill" style="${sc_style}">${sc}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:10px"><div><span style="color:var(--text3);display:block;font-size:10px">CAKE</span><input class="bare-in" value="${esc(o.cake)}" style="font-size:13px" oninput="orders[${i}].cake=this.value"/></div><div><span style="color:var(--text3);display:block;font-size:10px">SIZE</span><input class="bare-in" value="${esc(o.size)}" style="font-size:13px;width:70px" oninput="orders[${i}].size=this.value"/></div><div><span style="color:var(--text3);display:block;font-size:10px">DUE DATE</span><input type="date" value="${o.dueDate}" style="font-size:13px;padding:4px 6px" oninput="orders[${i}].dueDate=this.value"/></div><div><span style="color:var(--text3);display:block;font-size:10px">PRICE</span><div style="display:flex;align-items:center;gap:2px"><span style="color:var(--teal);font-weight:700">$</span><input class="bare-in" type="number" value="${o.price}" style="font-size:15px;color:var(--teal);font-weight:700;width:80px" oninput="orders[${i}].price=+this.value"/></div></div><div><span style="color:var(--text3);display:block;font-size:10px">TYPE</span><select onchange="orders[${i}].deliveryType=this.value;renderOrders()" style="font-size:13px;padding:4px 6px"><option ${o.deliveryType==='Pickup'?'selected':''}>Pickup</option><option ${o.deliveryType==='Delivery'?'selected':''}>Delivery</option></select></div><div style="display:flex;align-items:center;gap:8px;padding-top:14px"><input type="checkbox" ${o.paid?'checked':''} onchange="orders[${i}].paid=this.checked;renderOrders()" style="width:20px;height:20px;accent-color:var(--teal)"><span style="color:${o.paid?'var(--teal)':'var(--red)'};font-weight:700;font-size:14px">${o.paid?'Paid ✓':'Unpaid'}</span></div></div>${o.deliveryType==='Delivery'?`<div style="margin-bottom:8px"><span style="font-size:10px;color:var(--text3);display:block">DELIVERY ADDRESS</span><input class="bare-in" value="${esc(o.address)}" style="font-size:13px;color:var(--text2)" oninput="orders[${i}].address=this.value" placeholder="Address…"/></div>`:''}<div style="background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:10px"><span style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">NOTES</span><input class="bare-in" value="${esc(o.notes)}" style="font-size:13px;color:var(--text2)" oninput="orders[${i}].notes=this.value" placeholder="Special requests…"/></div><div style="display:flex;gap:8px"><select onchange="orders[${i}].status=this.value;renderOrders()" style="flex:1;font-size:13px;padding:8px"><option value="urgent" ${o.status==='urgent'?'selected':''}>🔴 Urgent</option><option value="upcoming" ${o.status==='upcoming'?'selected':''}>🟡 Upcoming</option><option value="ready" ${o.status==='ready'?'selected':''}>🟢 Confirmed</option><option value="done">✅ Done</option></select><button onclick="orders.splice(${i},1);renderOrders()" style="padding:8px 14px;color:var(--red);border-color:var(--redL);font-size:14px">Delete</button></div>`;el.appendChild(card);});renderCakeStat();}
+function addOrder(){orders.push({id:Date.now(),client:'New client',cake:'',size:'8"',servings:10,flavor:'',notes:'',dueDate:'',deliveryType:'Pickup',address:'',status:'upcoming',paid:false,price:0});renderOrders();show('orders');}
 renderOrders();
-
-function renderQuickCakes(){
-  const el=document.getElementById('quick-cakes');if(!el)return;
-  const todayStr=today.toISOString().slice(0,10);
-  const due=orders.filter(o=>o.dueDate===todayStr||o.status==='urgent');
-  el.innerHTML=due.length?due.map(o=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">🎂 ${o.client} <span style="color:var(--text3)">${o.deliveryType}</span></div>`).join(''):'<div style="font-size:12px;color:var(--text3)">Nothing due today</div>';
-}
-
-// DELIVERIES
+function renderCakeStat(){const el=document.getElementById('cake-stat');if(!el)return;const urgent=orders.filter(o=>o.status==='urgent');const upcoming=orders.filter(o=>o.status==='upcoming'||o.status==='ready');el.innerHTML=`<div style="margin-bottom:2px">${urgent.length} urgent</div><div style="color:var(--text3)">${upcoming.length} upcoming</div>`;}
 let deliveries=[];
 function addDelivery(){deliveries.push({id:Date.now(),client:'',date:'',time:'',address:'',done:false});renderDeliveries();}
-function renderDeliveries(){
-  const el=document.getElementById('delivery-list');el.innerHTML='';
-  if(!deliveries.length){el.innerHTML='<div style="font-size:12px;color:var(--text3)">No deliveries scheduled</div>';return;}
-  deliveries.forEach((d,i)=>{const div=document.createElement('div');div.style.cssText=`background:var(--bg2);border-radius:8px;padding:10px;border:1px solid var(--border);opacity:${d.done?.6:1}`;div.innerHTML=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input class="bare-in" value="${esc(d.client)}" placeholder="Client name…" style="font-weight:600;font-size:13px;flex:1"/><input type="date" value="${d.date}" onchange="deliveries[${i}].date=this.value" style="font-size:11px;padding:3px 6px;width:130px"/><input class="bare-in" value="${d.time}" placeholder="Time…" style="font-size:12px;width:70px" oninput="deliveries[${i}].time=this.value"/></div><div style="margin-top:6px;font-size:12px">📍 <input class="bare-in" value="${esc(d.address)}" placeholder="Address…" style="font-size:12px;color:var(--text2)" oninput="deliveries[${i}].address=this.value"/></div><div style="display:flex;gap:6px;margin-top:7px;align-items:center"><input type="checkbox" ${d.done?'checked':''} onchange="deliveries[${i}].done=this.checked;renderDeliveries()" style="accent-color:var(--teal)"><span style="font-size:11.5px;color:var(--text3)">${d.done?'Delivered ✓':'Mark as delivered'}</span><button onclick="deliveries.splice(${i},1);renderDeliveries()" style="margin-left:auto;font-size:11px;padding:2px 7px;color:var(--text3)">Remove</button></div>`;el.appendChild(div);});
-}
+function renderDeliveries(){const el=document.getElementById('delivery-list');el.innerHTML='';if(!deliveries.length){el.innerHTML='<div style="font-size:13px;color:var(--text3)">No deliveries scheduled</div>';return;}deliveries.forEach((d,i)=>{const div=document.createElement('div');div.style.cssText=`background:var(--bg2);border-radius:10px;padding:12px;border:1px solid var(--border);opacity:${d.done?.6:1}`;div.innerHTML=`<input class="bare-in" value="${esc(d.client)}" placeholder="Client name…" style="font-weight:700;font-size:15px;margin-bottom:8px"/><div style="display:flex;gap:8px;margin-bottom:8px"><input type="date" value="${d.date}" onchange="deliveries[${i}].date=this.value" style="flex:1;font-size:13px;padding:6px 8px"/><input class="bare-in" value="${d.time}" placeholder="Time…" style="font-size:13px;width:70px;text-align:right" oninput="deliveries[${i}].time=this.value"/></div><div style="font-size:13px;margin-bottom:8px">📍 <input class="bare-in" value="${esc(d.address)}" placeholder="Address…" style="font-size:13px;color:var(--text2)" oninput="deliveries[${i}].address=this.value"/></div><div style="display:flex;gap:8px;align-items:center"><input type="checkbox" ${d.done?'checked':''} onchange="deliveries[${i}].done=this.checked;renderDeliveries()" style="width:20px;height:20px;accent-color:var(--teal)"><span style="font-size:13px;color:var(--text3);flex:1">${d.done?'Delivered ✓':'Mark delivered'}</span><button onclick="deliveries.splice(${i},1);renderDeliveries()" style="padding:6px 12px;font-size:13px;color:var(--text3)">Remove</button></div>`;el.appendChild(div);});}
 renderDeliveries();
-function addZone(){const row=document.createElement('div');row.className='ti';row.innerHTML=`<input class="bare-in" placeholder="Zone – price…"/>`;document.querySelector('#page-delivery .card .col').appendChild(row);}
-
-// FLAVORS
-let flavors=[{name:'Classic Vanilla',desc:'Madagascar vanilla bean',price:'from $55',avail:true},{name:'Chocolate Ganache',desc:'Dark chocolate, ganache filling',price:'from $60',avail:true},{name:'Strawberry Dream',desc:'Fresh strawberry, cream cheese frosting',price:'from $65',avail:true},{name:'Lemon Blueberry',desc:'Lemon zest, fresh blueberry compote',price:'from $65',avail:true},{name:'Red Velvet',desc:'Classic red velvet, cream cheese',price:'from $65',avail:true},{name:'Carrot Cake',desc:'Spiced carrot, walnut, cream cheese',price:'from $60',avail:false}];
-function renderFlavors(){const el=document.getElementById('flavor-list');el.innerHTML='';flavors.forEach((f,i)=>{el.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:18px">🎂</span><div style="flex:1"><input class="bare-in" value="${esc(f.name)}" style="font-size:13px;font-weight:600" oninput="flavors[${i}].name=this.value"/><div><input class="bare-in" value="${esc(f.desc)}" style="font-size:11.5px;color:var(--text3)" oninput="flavors[${i}].desc=this.value"/></div></div><input class="bare-in" value="${f.price}" style="font-size:12px;font-weight:600;color:var(--purple);width:65px;text-align:right" oninput="flavors[${i}].price=this.value"/><span class="pill" style="background:${f.avail?'var(--tealL)':'var(--redL)'};color:${f.avail?'var(--tealD)':'var(--red)'};cursor:pointer" onclick="flavors[${i}].avail=!flavors[${i}].avail;renderFlavors()">${f.avail?'Available':'Paused'}</span><button onclick="flavors.splice(${i},1);renderFlavors()" style="font-size:13px;padding:2px 5px;color:var(--text3)">×</button></div>`;});}
+function addZone(){const row=document.createElement('div');row.className='ti';row.innerHTML=`<input class="bare-in" placeholder="Zone – price…"/>`;document.getElementById('zone-list').appendChild(row);}
+let flavors=[{name:'Classic Vanilla',desc:'Madagascar vanilla bean',price:'from $55',avail:true},{name:'Chocolate Ganache',desc:'Dark chocolate, ganache filling',price:'from $60',avail:true},{name:'Strawberry Dream',desc:'Fresh strawberry, cream cheese',price:'from $65',avail:true},{name:'Lemon Blueberry',desc:'Lemon zest, blueberry compote',price:'from $65',avail:true},{name:'Red Velvet',desc:'Classic red velvet, cream cheese',price:'from $65',avail:true},{name:'Carrot Cake',desc:'Spiced carrot, walnut, cream cheese',price:'from $60',avail:false}];
+function renderFlavors(){const el=document.getElementById('flavor-list');el.innerHTML='';flavors.forEach((f,i)=>{el.innerHTML+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)"><span style="font-size:22px">🎂</span><div style="flex:1"><input class="bare-in" value="${esc(f.name)}" style="font-size:14px;font-weight:600" oninput="flavors[${i}].name=this.value"/><div><input class="bare-in" value="${esc(f.desc)}" style="font-size:12px;color:var(--text3)" oninput="flavors[${i}].desc=this.value"/></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input class="bare-in" value="${f.price}" style="font-size:13px;font-weight:700;color:var(--purple);width:80px" oninput="flavors[${i}].price=this.value"/><span class="pill" style="background:${f.avail?'var(--tealL)':'var(--redL)'};color:${f.avail?'var(--tealD)':'var(--red)'};cursor:pointer;font-size:11px" onclick="flavors[${i}].avail=!flavors[${i}].avail;renderFlavors()">${f.avail?'Available':'Paused'}</span></div></div><button onclick="flavors.splice(${i},1);renderFlavors()" style="font-size:18px;padding:4px 6px;color:var(--text3)">×</button></div>`;});}
 function addFlavor(){flavors.push({name:'New flavor',desc:'',price:'from $55',avail:true});renderFlavors();}
 renderFlavors();
-
-// BUDGET
 let bRows=[{cat:'Rent / mortgage',amt:1400},{cat:'Groceries',amt:500},{cat:'Daniel school & activities',amt:250},{cat:'Cake supplies',amt:200},{cat:'Utilities',amt:180},{cat:'Transport',amt:150},{cat:'Healthcare / meds',amt:120},{cat:'Savings',amt:300}];
-function renderBudget(){const income=parseFloat(document.getElementById('income').value)||0;const total=bRows.reduce((s,r)=>s+(+r.amt||0),0),rem=income-total;const container=document.getElementById('b-rows');container.innerHTML='';bRows.forEach((r,i)=>{const pct=income>0?Math.min(100,Math.round(r.amt/income*100)):0;const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px';row.innerHTML=`<input class="bare-in" value="${esc(r.cat)}" style="flex:1;font-size:12.5px;color:var(--text2)" oninput="bRows[${i}].cat=this.value"/><span style="font-size:11px;color:var(--text3)">$</span><input type="number" value="${r.amt}" style="width:70px;text-align:right;border:none;background:transparent;outline:none;font-family:inherit;font-size:12.5px;color:var(--text)" oninput="bRows[${i}].amt=+this.value;renderBudget()"><div style="flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--purple);border-radius:2px"></div></div><button onclick="bRows.splice(${i},1);renderBudget()" style="font-size:13px;padding:2px 4px;color:var(--text3)">×</button>`;container.appendChild(row);});document.getElementById('b-total').innerHTML=`<span>Total expenses</span><span>$${total.toLocaleString()}</span>`;document.getElementById('b-summary').innerHTML=`<div class="clabel">Remaining</div><div style="font-size:24px;font-weight:700;color:${rem>=0?'var(--teal)':'var(--red)'}">$${rem.toLocaleString()}</div><div style="font-size:11px;color:var(--text3);margin-top:4px">${rem>=0?'✅ On track':'⚠️ Over by $'+Math.abs(rem).toLocaleString()}</div>`;}
+function renderBudget(){const income=parseFloat(document.getElementById('income').value)||0;const total=bRows.reduce((s,r)=>s+(+r.amt||0),0),rem=income-total;const container=document.getElementById('b-rows');container.innerHTML='';bRows.forEach((r,i)=>{const pct=income>0?Math.min(100,Math.round(r.amt/income*100)):0;const row=document.createElement('div');row.className='b-row';row.innerHTML=`<input class="bare-in" value="${esc(r.cat)}" style="flex:1;font-size:14px;color:var(--text2)" oninput="bRows[${i}].cat=this.value"/><span style="color:var(--text3)">$</span><input type="number" value="${r.amt}" style="width:75px;text-align:right;border:none;background:transparent;outline:none;font-family:inherit;font-size:14px;color:var(--text)" oninput="bRows[${i}].amt=+this.value;renderBudget()"><button onclick="bRows.splice(${i},1);renderBudget()" style="font-size:18px;padding:2px 6px;color:var(--text3)">×</button>`;container.appendChild(row);const barRow=document.createElement('div');barRow.style.cssText='padding:0 0 8px;border-bottom:1px solid var(--border)';barRow.innerHTML=`<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--purple);border-radius:2px"></div></div>`;container.appendChild(barRow);});document.getElementById('b-total').innerHTML=`<span>Total expenses</span><span style="font-weight:700">$${total.toLocaleString()}</span>`;document.getElementById('b-summary').innerHTML=`<div class="clabel">Remaining this month</div><div style="font-size:32px;font-weight:700;color:${rem>=0?'var(--teal)':'var(--red)'}">$${rem.toLocaleString()}</div><div style="font-size:12px;color:var(--text3);margin-top:4px">${rem>=0?'✅ On track':'⚠️ Over budget by $'+Math.abs(rem).toLocaleString()}</div>`;}
 function addBRow(){bRows.push({cat:'New expense',amt:0});renderBudget();}
 renderBudget();
-
-// MEALS
 const mDays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],mTypes=['Breakfast','Lunch','Dinner'];
 const mc=document.getElementById('meal-container');
-mc.innerHTML=`<div style="display:grid;grid-template-columns:72px repeat(7,1fr);gap:4px;margin-bottom:4px"><div></div>${mDays.map(d=>`<div style="font-size:10.5px;font-weight:700;color:var(--text2);text-align:center;padding:3px 0">${d}</div>`).join('')}</div>`;
-mTypes.forEach(type=>{const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:72px repeat(7,1fr);gap:4px;margin-bottom:4px';row.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:6px 0;align-self:center">${type}</div>${mDays.map(()=>`<div style="background:var(--bg2);border-radius:6px;padding:6px"><textarea style="width:100%;border:none;background:transparent;font-size:11.5px;color:var(--text);outline:none;font-family:inherit;resize:none;line-height:1.45" rows="2" placeholder="…"></textarea></div>`).join('')}`;mc.appendChild(row);});
+mc.innerHTML=`<div style="display:grid;grid-template-columns:60px repeat(7,minmax(70px,1fr));gap:4px;margin-bottom:4px"><div></div>${mDays.map(d=>`<div style="font-size:10px;font-weight:700;color:var(--text2);text-align:center;padding:3px 0">${d}</div>`).join('')}</div>`;
+mTypes.forEach(type=>{const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:60px repeat(7,minmax(70px,1fr));gap:4px;margin-bottom:4px';row.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:6px 0;align-self:center">${type}</div>${mDays.map(()=>`<div style="background:var(--bg2);border-radius:6px;padding:6px"><textarea style="width:100%;border:none;background:transparent;font-size:11px;color:var(--text);outline:none;font-family:inherit;resize:none;line-height:1.4" rows="2" placeholder="…"></textarea></div>`).join('')}`;mc.appendChild(row);});
 let groceries=[];
 function addGrocery(){groceries.push({text:'',done:false});renderGroceries();}
-function renderGroceries(){const el=document.getElementById('grocery-list');el.innerHTML='';groceries.forEach((g,i)=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${g.done?'checked':''} onchange="groceries[${i}].done=!groceries[${i}].done;renderGroceries()"><input class="tin" value="${esc(g.text)}" placeholder="Item…" style="${g.done?'text-decoration:line-through;color:var(--text3)':''}" oninput="groceries[${i}].text=this.value"><button class="xbtn" onclick="groceries.splice(${i},1);renderGroceries()">×</button>`;el.appendChild(d);});}
+function renderGroceries(){const el=document.getElementById('grocery-list');el.innerHTML='';groceries.forEach((g,i)=>{const d=document.createElement('div');d.className='ti';d.innerHTML=`<input type="checkbox" class="cb" ${g.done?'checked':''} onchange="groceries[${i}].done=!groceries[${i}].done;renderGroceries()"><input class="tin" value="${esc(g.text)}" placeholder="Item…" style="${g.done?'text-decoration:line-through;color:var(--text3)':''}; font-size:15px" oninput="groceries[${i}].text=this.value"><button class="xbtn" onclick="groceries.splice(${i},1);renderGroceries()">×</button>`;el.appendChild(d);});}
 ['Eggs (2 dozen)','Butter','Flour (5kg)','Heavy cream','Strawberries','Milk','Spinach','Chicken breast'].forEach(t=>{groceries.push({text:t,done:false});});
 renderGroceries();
-
-// NOTES
-let notePages=[{title:'Cake client ideas',body:''},{title:'Daniel school notes',body:''},{title:'Self care & goals',body:''}],activePg=0;
-function renderNotePages(){const el=document.getElementById('note-pages');el.innerHTML='';notePages.forEach((p,i)=>{const btn=document.createElement('button');btn.style.cssText=`width:100%;text-align:left;font-size:12px;padding:6px 8px;border-radius:6px;border:${i===activePg?'1px solid var(--border)':'none'};background:${i===activePg?'#fff':'transparent'};color:${i===activePg?'var(--text)':'var(--text2)'};font-weight:${i===activePg?'600':'400'};cursor:pointer;font-family:inherit`;btn.textContent=p.title||'Untitled';btn.onclick=()=>{notePages[activePg].title=document.getElementById('note-title').value;notePages[activePg].body=document.getElementById('note-body').value;activePg=i;loadNote();renderNotePages();};el.appendChild(btn);});}
+let notePages=[{title:'Cake client ideas',body:''},{title:'Daniel school notes',body:''},{title:'Goals & self care',body:''}],activePg=0;
+function renderNoteTabs(){const el=document.getElementById('note-tabs');el.innerHTML='';notePages.forEach((p,i)=>{const btn=document.createElement('button');btn.style.cssText=`padding:8px 14px;font-size:13px;font-weight:${i===activePg?'700':'400'};background:${i===activePg?'var(--purpleL)':'var(--bg2)'};color:${i===activePg?'var(--purpleD)':'var(--text2)'};border-color:${i===activePg?'var(--purple)':'var(--border)'};white-space:nowrap;border-radius:20px`;btn.textContent=p.title||'Untitled';btn.onclick=()=>{notePages[activePg].title=document.getElementById('note-title').value;notePages[activePg].body=document.getElementById('note-body').value;activePg=i;loadNote();renderNoteTabs();};el.appendChild(btn);});}
 function loadNote(){const p=notePages[activePg];document.getElementById('note-title').value=p.title;document.getElementById('note-body').value=p.body;}
-function addNotePage(){notePages[activePg].title=document.getElementById('note-title').value;notePages[activePg].body=document.getElementById('note-body').value;notePages.push({title:'New page',body:''});activePg=notePages.length-1;loadNote();renderNotePages();}
-renderNotePages();loadNote();
-
-function addRefill(){const n=prompt('Medication name:');const d=prompt('Refill date (YYYY-MM-DD):');if(n&&d){const el=document.getElementById('refill-list');el.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--border)"><span>💊</span><span style="flex:1;color:var(--text)">${n}</span><span class="pill" style="background:var(--amberL);color:#7a5010">${d}</span></div>`;}}
+function addNotePage(){notePages[activePg].title=document.getElementById('note-title').value;notePages[activePg].body=document.getElementById('note-body').value;notePages.push({title:'New page',body:''});activePg=notePages.length-1;loadNote();renderNoteTabs();}
+renderNoteTabs();loadNote();
+function addRefill(){const n=prompt('Medication name:');const d=prompt('Refill date (YYYY-MM-DD):');if(n&&d){const el=document.getElementById('refill-list');const first=el.querySelector('div');if(first&&first.style.color)first.remove();el.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;font-size:14px;padding:8px 0;border-bottom:1px solid var(--border)"><span>💊</span><span style="flex:1">${n}</span><span class="pill" style="background:var(--amberL);color:#7a5010">${d}</span></div>`;}}
 </script>
 </body>
 </html>
